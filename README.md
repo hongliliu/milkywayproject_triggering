@@ -44,7 +44,7 @@ Referencing
 If you use this code, please cite:
 Kendrew et al, 'The Milky Way Project: A Statistical Study of Massive Star Formation Associated with Infrared Bubbles', ApJ 755(1), 71 (2012) ([ADS](http://adsabs.harvard.edu/abs/2012ApJ...755...71K), [Arxiv](http://arxiv.org/abs/1203.5486))
 
-I'd like to hear about your work so drop me a line. If you upset he code extensively, please consider adding me as a co-author to any resulting publications.
+I'd like to hear about your correlation function work so drop me a line. If you use the code extensively, please consider adding me as a co-author to any resulting publications.
 
 Further reading
 ---------------
