@@ -3,7 +3,7 @@
 # S. Kendrew, Heidelberg June 2013
 
 # Requires Python packages: math, os, numpy, scipy, matplotlib, astropy, time, itertools, and calc_corr.py
-# Tested on Python 2.6.6, should be compative with 2.7 as well.
+# Tested on Python 2.6.6, should be compatible with 2.7 as well.
 # 
 
 import math
@@ -63,9 +63,7 @@ rc('ytick.minor', size=1)
 dr1Lfile = 'cats/mwp-bubble-lists-DR1/mwp-large-bubbles-dr1-29-02-2012.csv'
 dr1Lcols = ["id","churchid","lon","lat","reff","thick","ecc","angle", "hitrate","disp","hierarchy"]
 dr1L=ascii.read(dr1Lfile, delimiter=',', names=dr1Lcols, comment='#', data_start=1)   
-# DR1 table lists effective diameter! but it's actually the radius.
 # in 29/02 file all RADII, in arcmin
-#dr1['reff']=dr1['reff']/2.
 neg=dr1L['lon'] > 180.
 dr1L['lon'][neg]=dr1L['lon'][neg]-360.
 print '# MWP-DR1 bubbles before clipping: %i' %(np.size(dr1L)) 
@@ -74,10 +72,7 @@ dr1L = dr1L[clipcond]
 print '# MWP-DR1 bubbles after clipping: %i' %(np.size(dr1L)) 
 # Add any additional clipping criteria here:
  
-tq1=dr1L.thick >= stats.scoreatpercentile(dr1L.thick, 25.)
-tq2=dr1L.thick >= stats.scoreatpercentile(dr1L.thick, 50.)
-tq3=dr1L.thick >= stats.scoreatpercentile(dr1L.thick, 75.)
-tq4=dr1L.thick >= stats.scoreatpercentile(dr1L.thick, 90.)
+
 
 # END
 
@@ -102,19 +97,17 @@ print '# MWP-DR1 Small bubbles after clipping: %i' %(np.size(dr1S))
 dr1file = '../catalogs/public_DR1/mwp-bubble-lists-DR1/mwp-all-bubbles-dr1-29-02-2012.csv'
 dr1cols = ["id","churchid","lon","lat","reff","thick","ecc","angle", "hitrate","disp","hierarchy"]
 dr1=ascii.read(dr1file, delimiter=',', names=dr1cols, comment='#', data_start=1)   
-# DR1 table lists effective diameter! but it's actually the radius - see evernote comments of 24/02
 # in 29/02 file all RADII, in arcmin
 neg=dr1['lon'] > 180.
 dr1['lon'][neg]=dr1['lon'][neg]-360.
 print '# MWP-DR1 bubbles before clipping: %i' %(np.size(dr1)) 
-
-# the RMA survey doesn't cover |l| < 10. so exclude those bubbles as well.
+# the RMS survey doesn't cover |l| < 10. so exclude those bubbles as well.
 clipcond =(np.abs(dr1['lon']) >= 10.)
 dr1 = dr1[clipcond]
 print '# MWP-DR1 bubbles after clipping: %i' %(np.size(dr1)) 
 # Add any additional clipping criteria here:
 
-# divide into quartiles according to size
+# divide into quartiles according to size in case you want to look at those
 
 rq1=dr1['reff'] >= stats.scoreatpercentile(dr1['reff'], 25.)
 rq2=dr1['reff'] >= stats.scoreatpercentile(dr1['reff'], 50.)
@@ -134,7 +127,6 @@ yso['lon'][neg]=yso['lon'][neg]-360.
 #trim the ? out of the types field:
 yso.type[np.char.endswith(yso.type, '?')]=np.char.rstrip(yso.type, '?')
 print '# YSOs before clipping: {0}' .format(np.size(yso))
-
 # the RMS survey covers more in longitude and latitude than MWP so exclude beyond |l| = 65 and |b| = 1
 coord_lim =  (np.abs(yso['lat']) <= 1.) & (np.abs(yso['lon']) <= 65.) 
 yso = yso[coord_lim]
@@ -150,7 +142,6 @@ for i in range(0,len(types)):
 
 # the divSample function is kind of independent but I've included it in the calc_corr file.
 dr1_assoc, dr1_assoc2, dr1_control = calc_corr.divSample(yso, dr1)
-c06_assoc, c06_assoc2, c06_control = calc_corr.divSample(yso, c06)
 
 
 #sample correlation calls, with optional data file output of the results:
@@ -161,11 +152,11 @@ x=writeData(mwprms_theta, mwprms_corr, mwprms_err, outFile='mwprms_all.dat', bub
 
 # just the large bubbles and RMS sources:
 mwpLrms_theta, mwpLrms_corr, mwpLrms_err = calc_corr.calc_corr(dr1L, yso, corrType='x', rSize=50, nbStrap=100, binStep=0.2)
-x=writeData(mwpLrms_theta, mwpLrms_corr, mwpLrms_err, outFile='mwpLrms.dat', bubCat='dr1L', ysoCat='rms', rSize=50, nbStrap=100 )
+y=writeData(mwpLrms_theta, mwpLrms_corr, mwpLrms_err, outFile='mwpLrms.dat', bubCat='dr1L', ysoCat='rms', rSize=50, nbStrap=100 )
 
-# RMS YSOsauto-correlations:
+# RMS YSOs auto-correlations:
 ysodr1_theta, ysodr1_acorr, ysodr1_err = calc_corr.calc_corr(dr1, yso, corrType='a', rSize=50, nbStrap=100, binStep=0.5)
-x=writeData(ysodr1_theta, ysodr1_acorr, ysodr1_err, outFile='mwpyso_acorr_all.dat', bubCat='dr1', ysoCat='rms all', rSize=50, nbStrap=100 )
+z=writeData(ysodr1_theta, ysodr1_acorr, ysodr1_err, outFile='mwpyso_acorr_all.dat', bubCat='dr1', ysoCat='rms all', rSize=50, nbStrap=100 )
 
 # Sample correlation function plot:
  
