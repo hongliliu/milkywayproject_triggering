@@ -5,6 +5,11 @@
 # Requires Python packages: math, os, numpy, scipy, matplotlib, astropy, time, itertools, and calc_corr.py
 # Tested on Python 2.6.6, should be compatible with 2.7 as well.
 # 
+#
+# NOTE: the catalogue files used here are those used for Kendrew+ 2012. As these surveys are both still live, these are
+# unlikely to reflect the most recent datasets from the projects ca. 2013. 
+#
+
 
 import math
 import sys
@@ -77,7 +82,7 @@ print '# MWP-DR1 bubbles after clipping: %i' %(np.size(dr1L))
 # END
 
 # read in official dr1-SMALL catalogue:
-dr1Sfile = '../catalogs/public_DR1/mwp-bubble-lists-DR1/mwp-small-bubbles-dr1-29-02-2012.csv'
+dr1Sfile = 'cats/mwp-small-bubbles-dr1-29-02-2012.csv'
 dr1Scols = ["id","churchid","lon","lat","reff","hitrate","hierarchy"]
 dr1S=ascii.read(dr1Sfile, delimiter=',', names=dr1Scols, data_start=1)   
 neg=dr1S['lon'] > 180.
@@ -94,7 +99,7 @@ print '# MWP-DR1 Small bubbles after clipping: %i' %(np.size(dr1S))
 # END
 
 # read in the concatenated table of SMALL+LARGE bubbles
-dr1file = '../catalogs/public_DR1/mwp-bubble-lists-DR1/mwp-all-bubbles-dr1-29-02-2012.csv'
+dr1file = 'cats/mwp-bubble-lists-DR1/mwp-all-bubbles-dr1-29-02-2012.csv'
 dr1cols = ["id","churchid","lon","lat","reff","thick","ecc","angle", "hitrate","disp","hierarchy"]
 dr1=ascii.read(dr1file, delimiter=',', names=dr1cols, comment='#', data_start=1)   
 # in 29/02 file all RADII, in arcmin
