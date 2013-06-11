@@ -20,14 +20,14 @@ The code is written in Python, and was fully tested in Python 2.6.6. It is compa
 
 The following Python packages are used:
 
-numpy
-scipy
-matplotlib
-itertools
-astropy (v. 0.2.3)
-time
-os
-pdb (debugger, optional)
+* numpy
+* scipy
+* matplotlib
+* itertools
+* astropy (v. 0.2.3)
+* time
+* os
+* pdb (debugger, optional)
 
 The code comes with no guarantees that it will run on your system, though please email me with questions. I will maintain the code on a best-effort basis.
 
