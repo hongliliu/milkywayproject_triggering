@@ -4,7 +4,7 @@ Code to calculate correlation functions for two (astrophysical) catalogue datase
 
 
 What is this repository?
-========================
+------------------------
 
 The main file in the repository is calc_corr.py. This file contains functions that calculate the correlation function between two astrophyiscal data catalogues using the Landy-Szalay approximator generalised for heterogeneous datasets ([Landy \& Szalay, 1993](http://adsabs.harvard.edu/abs/1993ApJ...412...64L); [Bradshaw et al, 2011](http://adsabs.harvard.edu/abs/2011MNRAS.415.2626B)); or the auto-correlation function of one dataset.
 
@@ -14,7 +14,7 @@ In addition, the repository contains a sample script demonstrating how to use th
 
 
 Requirements and Dependencies
-==============================
+-----------------------------
 
 The code is written in Python, and was fully tested in Python 2.6.6. It is compatible with Python 2.7.
 
@@ -33,13 +33,13 @@ The code comes with no guarantees that it will run on your system, though please
 
 
 Who wrote it?
-===============
+-------------
 
 This code was written by [Sarah Kendrew](http://www.mpia.de/~kendrew), Postdoc in Astronomy, while at the [Max Planck Institute for Astronomy](http://www.mpia.de) in Heidelberg, Germany. For more info, please contact me on sarahaskendrew AT gmail.com
 
 
 Referencing
-============
+------------
 
 If you use this code, please cite:
 Kendrew et al, 'The Milky Way Project: A Statistical Study of Massive Star Formation Associated with Infrared Bubbles', ApJ 755(1), 71 (2012) ([ADS](http://adsabs.harvard.edu/abs/2012ApJ...755...71K), [Arxiv](http://arxiv.org/abs/1203.5486))
@@ -47,16 +47,16 @@ Kendrew et al, 'The Milky Way Project: A Statistical Study of Massive Star Forma
 I'd like to hear about your work so drop me a line. If you upset he code extensively, please consider adding me as a co-author to any resulting publications.
 
 Further reading
-================
+---------------
 Much useful background reading can be found in the Kendrew+ 2012 paper.
 
 
 Acknowledgements
-================
+-----------------
 
 This work was made possible by the participation of more than 35,000 volunteers on the Milky Way Project. Their contributions are acknowledged individually at http://www.milkywayproject.org/authors. The Milky Way Project is supported by The Leverhulme Trust. 
 
 
---- S. Kendrew, sarahaskendrew AT gmail.com, June 2013.
+--- _S. Kendrew, sarahaskendrew AT gmail.com, June 2013_
 
 
