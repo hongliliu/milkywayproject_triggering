@@ -163,13 +163,13 @@ def genRandomYso(ysoCat, size, params):
 	lat = np.zeros(randSize)
 	for elem in range(0,randSize):
 		while True:
-			lon[elem] = random.uniform(coordLims[0], coordLims[1])
+			lon[elem] = np.random.uniform(low=coordLims[0], high=coordLims[1])
 			if np.abs(lon[elem]) > 10.:
 				break
 			#lon[elem] = random.uniform(coordLims[0], coordLims[1])
 		while True:
-			lat[elem] = random.gauss(params[0], params[1])
-			if np.abs(lat[elem]) < 1.:
+			lat[elem] = np.random.normal(low=params[0], scale=params[1])
+			if np.abs(lat[elem]) <= 1.:
 				break
 			
 			#lat[elem] = random.uniform(coordLims[2], coordLims[3])
@@ -202,15 +202,16 @@ def genRandomBubs(bubCat, size, params, rparams):
 	#generate the randoms here but ensure with while loops that stays within the required coordinate range
 	for elem in range(0, size):
 		while True:
-			lon[elem] = random.uniform(coordLims[0], coordLims[1])
+			lon[elem] = np.random.uniform(low=coordLims[0], high=coordLims[1])
 			if np.abs(lon[elem]) > 10.:
 			   break
 		while True:
-			lat[elem] = random.gauss(params[0], params[1])
-			if np.abs(lat[elem]) < 1.:
+			lat[elem] = np.random.normal(loc=arams[0], scale=params[1])
+			if np.abs(lat[elem]) <= 1.:
 				break
 		while True:
-			reff_r[elem] = random.lognormvariate(rparams[0], rparams[1])
+			#reff_r[elem] = random.lognormvariate(rparams[0], rparams[1])
+			reff_r[elem] = np.random.lognormal(mean=rparams[0], sigma=rparams[1])
 			if (reff_r[elem] >= np.min(bubCat['reff'])) & (reff_r[elem] <= np.max(bubCat['reff'])):
 				break
    	randCatArr['lon'] = lon
