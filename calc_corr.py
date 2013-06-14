@@ -86,7 +86,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
 from scipy import optimize
-import random
 import itertools
 # Debugger: useful but optional
 import pdb
@@ -230,7 +229,7 @@ def genBstrap(inpCat):
 	# integer vector of randomised indices with the same length as inpCat, with replacements
 	##############################################################
 	nelem = np.size(inpCat)
-	_random, _int = random.random, int
+	_random, _int = np.random.rand, int
 	return [_int(_random() * nelem) for i in itertools.repeat(None, nelem)]  
 
 #=================================================================
