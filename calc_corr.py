@@ -90,6 +90,17 @@ import itertools
 # Debugger: useful but optional
 import pdb
 
+
+def constrained_random(size, proposal, constraint):
+    print size
+    result = proposal(size)
+    bad = ~constraint(result)
+    while bad.any():
+        result[bad] = proposal(bad.sum())
+        bad = ~constraint(result)
+    return result
+
+
 #==============================================================
 def fitLat(inpCat):
     ###########################################################
@@ -158,20 +169,22 @@ def genRandomYso(ysoCat, size, params):
     randSize = size
     types = [('lon', '<f8'), ('lat', '<f8')]
     randCatArr = np.ndarray(randSize, dtype=types)
-    lon = np.zeros(randSize)
-    lat = np.zeros(randSize)
-    for elem in range(0,randSize):
-        while True:
-            lon[elem] = np.random.uniform(low=coordLims[0], high=coordLims[1])
-            if np.abs(lon[elem]) > 10.:
-                break
-            #lon[elem] = random.uniform(coordLims[0], coordLims[1])
-        while True:
-            lat[elem] = np.random.normal(params[0], scale=params[1])
-            if np.abs(lat[elem]) <= 1.:
-                break
 
-            #lat[elem] = random.uniform(coordLims[2], coordLims[3])
+    def lon_p(size):
+        return np.random.uniform(coordLims[0], coordLims[1], size)
+
+    def lon_c(x):
+        return np.abs(x) > 10.
+
+    def lat_p(size):
+        return np.random.normal(params[0], params[1], size)
+
+    def lat_c(x):
+        return np.abs(x) <= 1
+
+    lon = constrained_random(size, lon_p, lon_c)
+    lat = constrained_random(size, lat_p, lat_c)
+
     randCatArr['lon'] = lon
     randCatArr['lat'] = lat
     randCat = randCatArr.view(np.recarray)
@@ -195,24 +208,34 @@ def genRandomBubs(bubCat, size, params, rparams):
     rLims = [np.min(bubCat['reff']), np.max(bubCat['reff'])]
     types = [('lon', '<f8'), ('lat', '<f8'), ('reff', '<f8')]
     randCatArr = np.ndarray(size, dtype=types)
-    lon = np.zeros(size)
-    lat = np.zeros(size)
-    reff_r = np.zeros(size)
-    #generate the randoms here but ensure with while loops that stays within the required coordinate range
-    for elem in range(0, size):
-        while True:
-            lon[elem] = np.random.uniform(low=coordLims[0], high=coordLims[1])
-            if np.abs(lon[elem]) > 10.:
-               break
-        while True:
-            lat[elem] = np.random.normal(loc=params[0], scale=params[1])
-            if np.abs(lat[elem]) <= 1.:
-                break
-        while True:
-            #reff_r[elem] = random.lognormvariate(rparams[0], rparams[1])
-            reff_r[elem] = np.random.lognormal(mean=rparams[0], sigma=rparams[1])
-            if (reff_r[elem] >= np.min(bubCat['reff'])) & (reff_r[elem] <= np.max(bubCat['reff'])):
-                break
+
+    reff_min = np.min(bubCat['reff'])
+    reff_max = np.max(bubCat['reff'])
+
+    #generate the randoms here but ensure that stays within the required coordinate range
+
+    def lon_p(size):
+        return np.random.uniform(coordLims[0], coordLims[1], size)
+
+    def lon_c(x):
+        return np.abs(x) > 10.
+
+    def lat_p(size):
+        return np.random.normal(params[0], params[1], size)
+
+    def lat_c(x):
+        return np.abs(x) <= 1
+
+    def reff_p(size):
+        return np.random.lognormal(mean=rparams[0], sigma=rparams[1],
+                                   size=size)
+    def reff_c(x):
+        return (x >= reff_min) & (x <= reff_max)
+
+    lon = constrained_random(size, lon_p, lon_c)
+    lat = constrained_random(size, lat_p, lat_c)
+    reff_r = constrained_random(size, reff_p, reff_c)
+
     randCatArr['lon'] = lon
     randCatArr['lat'] = lat
     randCatArr['reff'] = reff_r
