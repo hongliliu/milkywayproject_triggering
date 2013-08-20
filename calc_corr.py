@@ -92,7 +92,6 @@ import pdb
 
 
 def constrained_random(size, proposal, constraint):
-    print size
     result = proposal(size)
     bad = ~constraint(result)
     while bad.any():
@@ -252,8 +251,7 @@ def genBstrap(inpCat):
     # integer vector of randomised indices with the same length as inpCat, with replacements
     ##############################################################
     nelem = np.size(inpCat)
-    _random, _int = np.random.rand, int
-    return [_int(_random() * nelem) for i in itertools.repeat(None, nelem)]
+    return np.random.randint(0, nelem, nelem)
 
 #=================================================================
 def genNcountsX(cat1, cat2, bins, ctype):
@@ -272,20 +270,27 @@ def genNcountsX(cat1, cat2, bins, ctype):
     ##############################################################
     nsrc = np.size(cat1)
     dbn = np.zeros((len(bins)-1,nsrc))
+
     # cycle through the bubbles and calc vectorised distances to the YSOs. Then histogram them.
+
+    l1, l2, b1, b2 = map(np.asarray, [cat1['lon'], cat2['lon'],
+                                      cat1['lat'], cat2['lat']])
+    print nsrc, np.size(cat2), l1.shape, l2.shape
     if ctype == 'a':
         #for auto-correlation between homogeneous catalogues:
         for i in range(0,nsrc):
-            dist = np.sqrt((cat2['lon'] - cat1['lon'][i])**2 + (cat2['lat'] - cat1['lat'][i])**2)
-            dist = dist*60.                                        #calculate the distance in arcmins - DON'T NORMALISE
+            dist = np.hypot(l2 - l1[i], b2 - b1[i])
+            #calculate the distance in arcmins - DON'T NORMALISE
+            dist = dist*60.
             histTemp = np.histogram(dist, bins=bins)
             dbn[:,i] = histTemp[0]
     elif ctype == 'x':
         #for cross-correlation between heterogeneous catalogues:
         for i in range(0,nsrc):
-            dist = np.sqrt((cat2['lon'] - cat1['lon'][i])**2 + (cat2['lat'] - cat1['lat'][i])**2)
+            dist = np.hypot(l2 - l1[i], b2 - b1[i])
             dist = dist*60.
-            dist_r = dist/cat1['reff'][i]                            #normalises the distances to the effective radius (all in arcmin)
+            #normalises the distances to the effective radius (all in arcmin)
+            dist_r = dist/cat1['reff'][i]
             histTemp = np.histogram(dist_r, bins=bins)
             dbn[:,i] = histTemp[0]
 
