@@ -167,7 +167,7 @@ def genRandomYso(ysoCat, size, params):
                 break
             #lon[elem] = random.uniform(coordLims[0], coordLims[1])
         while True:
-            lat[elem] = np.random.normal(low=params[0], scale=params[1])
+            lat[elem] = np.random.normal(params[0], scale=params[1])
             if np.abs(lat[elem]) <= 1.:
                 break
 
@@ -205,7 +205,7 @@ def genRandomBubs(bubCat, size, params, rparams):
             if np.abs(lon[elem]) > 10.:
                break
         while True:
-            lat[elem] = np.random.normal(loc=arams[0], scale=params[1])
+            lat[elem] = np.random.normal(loc=params[0], scale=params[1])
             if np.abs(lat[elem]) <= 1.:
                 break
         while True:

@@ -65,7 +65,7 @@ rc('ytick.minor', size=1)
 
 
 #read in the official dr1-LARGE catalogue:
-dr1Lfile = 'cats/mwp-bubble-lists-DR1/mwp-large-bubbles-dr1-29-02-2012.csv'
+dr1Lfile = 'cats/mwp-large-bubbles-dr1-29-02-2012.csv'
 dr1Lcols = ["id","churchid","lon","lat","reff","thick","ecc","angle", "hitrate","disp","hierarchy"]
 dr1L=ascii.read(dr1Lfile, delimiter=',', names=dr1Lcols, comment='#', data_start=1)
 # in 29/02 file all RADII, in arcmin
@@ -99,7 +99,7 @@ print '# MWP-DR1 Small bubbles after clipping: %i' %(np.size(dr1S))
 # END
 
 # read in the concatenated table of SMALL+LARGE bubbles
-dr1file = 'cats/mwp-bubble-lists-DR1/mwp-all-bubbles-dr1-29-02-2012.csv'
+dr1file = 'cats/mwp-all-bubbles-dr1-29-02-2012.csv'
 dr1cols = ["id","churchid","lon","lat","reff","thick","ecc","angle", "hitrate","disp","hierarchy"]
 dr1=ascii.read(dr1file, delimiter=',', names=dr1cols, comment='#', data_start=1)
 # in 29/02 file all RADII, in arcmin
@@ -130,7 +130,8 @@ yso = ascii.read(ysofile, delimiter=',', names=ysocols, exclude_names=ysoexc,  d
 neg = yso['lon'] > 180.
 yso['lon'][neg]=yso['lon'][neg]-360.
 #trim the ? out of the types field:
-yso.type[np.char.endswith(yso.type, '?')]=np.char.rstrip(yso.type, '?')
+yso['type'] = np.char.rstrip(yso['type'], '?')
+
 print '# YSOs before clipping: {0}' .format(np.size(yso))
 # the RMS survey covers more in longitude and latitude than MWP so exclude beyond |l| = 65 and |b| = 1
 coord_lim =  (np.abs(yso['lat']) <= 1.) & (np.abs(yso['lon']) <= 65.)
@@ -138,10 +139,10 @@ yso = yso[coord_lim]
 print '# YSOs after clipping: {0}' .format(np.size(yso))
 # Add any additional clipping criteria here:
 # do counts for the different source types:
-types=np.unique(yso.type)
+types=np.unique(yso['type'])
 counts=np.zeros((len(types),3))
 for i in range(0,len(types)):
-    counts[i,0] = np.size(yso[yso.type == types[i]])
+    counts[i,0] = np.size(yso[yso['type'] == types[i]])
 
 
 
