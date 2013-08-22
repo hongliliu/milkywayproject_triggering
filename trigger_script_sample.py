@@ -9,8 +9,6 @@
 # NOTE: the catalogue files used here are those used for Kendrew+ 2012. As these surveys are both still live, these are
 # unlikely to reflect the most recent datasets from the projects ca. 2013.
 #
-
-
 import math
 import sys
 import numpy as np
@@ -25,6 +23,7 @@ import itertools
 from matplotlib import rc
 
 import calc_corr
+np.random.seed(42)
 
 plt.close('all')
 

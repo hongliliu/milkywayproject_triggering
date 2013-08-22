@@ -90,14 +90,68 @@ import itertools
 # Debugger: useful but optional
 import pdb
 
+from sklearn.neighbors import KDTree
+
 
 def constrained_random(size, proposal, constraint):
+    """
+    Generate samples from a random distribution, with constraints
+
+    Parameters
+    ----------
+    size : int
+        Number of samples to draw
+
+    proposal : func
+        Function which takes size as input,
+        and returns that many random samples
+
+    constraint : func
+        Function which takes an array as input,
+        and returns a True/False array indicating
+        whether each point is allowed
+
+    Returns
+    -------
+    size draws from the proposal function, all of which pass the
+    constraint test
+    """
     result = proposal(size)
     bad = ~constraint(result)
     while bad.any():
         result[bad] = proposal(bad.sum())
         bad = ~constraint(result)
     return result
+
+
+def fast_histogram(tree, xy, bins):
+    """
+    Use a KD tree to quickly compute a histogram of distances
+    to an x, y point
+
+    Parameters
+    ----------
+    tree : sklearn.neighbors.KDTree instance
+        Tree holding the data points
+
+    xy : ndarray [1 row, 2 columns]
+        The point to query
+
+    bins : ndarray [n elements]
+        The bin edges
+
+    Returns
+    -------
+    counts : [n - 1 elements]
+       Histogram counts
+    """
+    #nudge xy, since KDtree doesn't like exact matches
+    eps = np.random.normal(0, 1e-7, xy.shape)
+    xy = xy + eps
+
+    xy, _ = np.broadcast_arrays(xy.reshape(1, 2), bins.reshape(-1, 1))
+    counts = tree.query_radius(xy, bins, count_only=True)
+    return counts[1:] - counts[:-1]
 
 
 #==============================================================
@@ -275,25 +329,22 @@ def genNcountsX(cat1, cat2, bins, ctype):
 
     l1, l2, b1, b2 = map(np.asarray, [cat1['lon'], cat2['lon'],
                                       cat1['lat'], cat2['lat']])
-    print nsrc, np.size(cat2), l1.shape, l2.shape
+    lb1 = np.column_stack((l1, b1))
+    lb2 = np.column_stack((l2, b2))
+    tree = KDTree(lb2)
+
     if ctype == 'a':
         #for auto-correlation between homogeneous catalogues:
         for i in range(0,nsrc):
-            dist = np.hypot(l2 - l1[i], b2 - b1[i])
-            #calculate the distance in arcmins - DON'T NORMALISE
-            dist = dist*60.
-            histTemp = np.histogram(dist, bins=bins)
-            dbn[:,i] = histTemp[0]
+            #convert bins from arcmin to degrees
+            dbn[:, i] = fast_histogram(tree, lb1[i], bins / 60.)
+
     elif ctype == 'x':
         #for cross-correlation between heterogeneous catalogues:
+        reff = np.asarray(cat1['reff'])
         for i in range(0,nsrc):
-            dist = np.hypot(l2 - l1[i], b2 - b1[i])
-            dist = dist*60.
-            #normalises the distances to the effective radius (all in arcmin)
-            dist_r = dist/cat1['reff'][i]
-            histTemp = np.histogram(dist_r, bins=bins)
-            dbn[:,i] = histTemp[0]
-
+            #convert bins from bubble radii to degrees
+            dbn[:, i] = fast_histogram(tree, lb1[i], bins * reff[i] / 60)
 
     dbnTot = np.sum(dbn, axis = 1)
     dbnBox = dbnTot

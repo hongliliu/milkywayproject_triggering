@@ -22,6 +22,7 @@ The following Python packages are used:
 
 * numpy
 * scipy
+* scikit-learn
 * matplotlib
 * itertools
 * astropy (v. 0.2.3)
@@ -54,9 +55,7 @@ Much useful background reading can be found in the Kendrew+ 2012 paper.
 Acknowledgements
 -----------------
 
-This work was made possible by the participation of more than 35,000 volunteers on the Milky Way Project. Their contributions are acknowledged individually at http://www.milkywayproject.org/authors. The Milky Way Project is supported by The Leverhulme Trust. 
+This work was made possible by the participation of more than 35,000 volunteers on the Milky Way Project. Their contributions are acknowledged individually at http://www.milkywayproject.org/authors. The Milky Way Project is supported by The Leverhulme Trust.
 
 
 --- _S. Kendrew, sarahaskendrew AT gmail.com, June 2013_
-
-
