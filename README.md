@@ -38,6 +38,9 @@ Who wrote it?
 
 This code was written by [Sarah Kendrew](http://www.mpia.de/~kendrew), Postdoc in Astronomy, while at the [Max Planck Institute for Astronomy](http://www.mpia.de) in Heidelberg, Germany. For more info, please contact me on sarahaskendrew AT gmail.com
 
+Additional contributors:
+[Chris Beaumont](https://github.com/ChrisBeaumont), Harvard Center for Astrophysics
+
 
 Referencing
 ------------
@@ -58,4 +61,4 @@ Acknowledgements
 This work was made possible by the participation of more than 35,000 volunteers on the Milky Way Project. Their contributions are acknowledged individually at http://www.milkywayproject.org/authors. The Milky Way Project is supported by The Leverhulme Trust.
 
 
---- _S. Kendrew, sarahaskendrew AT gmail.com, June 2013_
+--- _S. Kendrew, sarahaskendrew AT gmail.com, Aug 2013_
