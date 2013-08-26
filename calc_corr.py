@@ -6,7 +6,7 @@
 #
 # Language: python
 #
-# Code tested under the following compilers/operating systems: Mac OSX 10.6.8, python 2.6.6
+# Code tested under the following compilers/operating systems: Mac OSX 10.6.8, python 2.6.6, python 2.7
 #
 # Description of input data:
 # bubCat: a numpy recarray describing the input bubble catalog. must contain the following fields:
@@ -49,6 +49,8 @@
 # The code calculates cross- and auto-correlation functions for two generic input catalgos, as described above. It uses the Landy-Szalay
 # correlation estimator, described in detail in Landy & Szalay (1993).
 # As well as the main function calc_corr, the file contains a number of supporting routines:
+#    - constrained_random: helper function for random catalogue generation
+#    - fast_histogram: use a KDTree to speed up the distance calculations and pair counts.
 #    - fitLat: performs a Gaussian fit to the latitude distributions of the catalogs
 #    - fitReff: performs a log-normal fit to the effective radii distribution of bubCat
 #    - genRandomYso: generates a random catalog of YSOs based on the properties of the input catalog ysoCat and the specified size, rSize
@@ -65,20 +67,16 @@
 # to the script header. Individual functions can then be called using e.g.
 #                x, y, yerr = calc_corr.calc_corr(cat1, cat2, corrType='x', rSize=100, nbStrap=100, binStep=0.1)
 #
-#================================================================================
-#The AAS gives permission to anyone who wishes to use these subroutines to run their own calculations.
-#Permission to republish or reuse these routines should be directed to permissions@aas.org.
-
-#Note that the AAS does not take responsibility for the content of the source code. Potential users should
-#be wary of applying the code to conditions that the code was not written to model and the accuracy of the
-#code may be affected when compiled and executed on different systems.
-#================================================================================
 #
 #
 # Written by S. Kendrew, 2012, kendrew@mpia.de
+# 
+# Contributors:
+# Chris Beaumont, Harvard Center for Astrophysics
 #
 # Changes:
-# jun 2013: changed addressing of recarray from e.g. ['lon'] to ['lon'] (in line with python 2.7)
+# jun 2013: changed addressing of recarray from e.g. ['lon'] to ['lon'] (in line with python 2.7) (SK)
+# aug 2013: improved speed of calculation by using a KD Tree. vectorised the random catalogue generation. (CB)
 #
 #########################################################################################################################
 
@@ -124,6 +122,7 @@ def constrained_random(size, proposal, constraint):
         bad = ~constraint(result)
     return result
 
+#===============================================================
 
 def fast_histogram(tree, xy, bins):
     """
@@ -157,13 +156,13 @@ def fast_histogram(tree, xy, bins):
 
 #==============================================================
 def fitLat(inpCat):
-    ###########################################################
+    """
     # Fits a gaussian to the galactic latitude distribution of the input cat
     # inpCat: numpy recarray that must have the field inpCat['lat']
     # returns:
     # latp1[1]: mean of the best-fit gaussian (float)
     # latp1[2]: sigma of the best-fit gaussian (float)
-    ###########################################################
+    """
     # define a gaussian fitting function where
     # p[0] = amplitude
     # p[1] = mean
@@ -185,13 +184,13 @@ def fitLat(inpCat):
 
 #=============================================================
 def fitReff(inpCat):
-    ##########################################################
+    """
     # Fits a log-normal distribution to the distribution of effective radii of inpCat (bubble catalog)
     # inpCat: numpy recarray that must have the field inpCat['reff'] describing the objects' effective radii (arcmin)
     # returns:
     # reffp1[1]: mean of distribution (float)
     # reffp1[2]: sigma of distribution (float)
-    #########################################################
+    """
     rhist = np.histogram(np.log(inpCat['reff']), bins=10)
     binStep = rhist[1][1]-rhist[1][0]
     fitx = (binStep/2.)+rhist[1][:-1]
@@ -208,8 +207,7 @@ def fitReff(inpCat):
 
 #==============================================================
 def genRandomYso(ysoCat, size, params):
-
-    ###########################################################
+    """
     # Generates a random catalog of YSOs from the input catalog, the user-specified random size and the latitude fit parameters
     # Inputs:
     # inpCat: numpy recarray, must contain fields inpCat['lon'] (gal longitude), inpCat['lat'] (gal latitude)
@@ -219,7 +217,7 @@ def genRandomYso(ysoCat, size, params):
     # randCat: numpy recarray with fields randCat['lon'] (float, gal longitudes) and randCat['lat'] (float, gal latitudes)
     # NOTE: this version of the code excludes |l| < 10. as this is not covered in the RMS survey. for other surveys, amend lines
     #           167-168.
-    ###########################################################
+    """
     coordLims = [-65., 65., -1., 1.]
     randSize = size
     types = [('lon', '<f8'), ('lat', '<f8')]
@@ -248,17 +246,17 @@ def genRandomYso(ysoCat, size, params):
 
 #===============================================================
 def genRandomBubs(bubCat, size, params, rparams):
-    ###########################################################
+    """"
     # Generates a random catalog of bubbles from the input catalog, the user-specified random size and the latitude and Reff fit parameters
     # Inputs:
-    # bubCat: numpy recarray, must contain fields bubCat['lon'] (float, gal longitude), bubCat['lat'] (float, gal latitude), bubCat['reff'] (float, effective radius)
+    # bubCat: numpy recarray, must contain fields bubCat['lon'] (float, gal longitude), bubCat['lat'] (float, gal latitude), bubCat['reff']     (float, effective radius)
     # size: int, desired number of sources in random catalog; calculated from the rSize parameter in the top-level function
     # params: a 2-element tuple of floats with the mu and sigma values of the best-fit gaussian latitude distribution, as returned by fitLat()
     # rparams: as params for the best-fit log-normal distribution for reff, as returned by fitReff()
     # Returns:
     # randCat: numpy recarray with fields randCat['lon'] (float, gal longitudes), randCat['lat'] (float, gal latitudes), randCat['reff'] (float, effective radii in arcmin)
     # all sources in randCat cover the same coordinate range as bubCat and all sizes are within the minimum and maximum sizes in bubCat
-    ###########################################################
+    """
     coordLims = [-65., 65., -1., 1.]
     rLims = [np.min(bubCat['reff']), np.max(bubCat['reff'])]
     types = [('lon', '<f8'), ('lat', '<f8'), ('reff', '<f8')]
@@ -299,19 +297,19 @@ def genRandomBubs(bubCat, size, params, rparams):
 
 #=================================================================
 def genBstrap(inpCat):
-    ##############################################################
+    """"
     # Generates random indices with replacement from the inpCat, for bootstrapping
     # Input:
     # inpCat: numpy recarray
     # Returns:
     # integer vector of randomised indices with the same length as inpCat, with replacements
-    ##############################################################
+    """
     nelem = np.size(inpCat)
     return np.random.randint(0, nelem, nelem)
 
 #=================================================================
 def genNcountsX(cat1, cat2, bins, ctype):
-    ##############################################################
+    """
     # Calculates the pair counts between two catalogs, or within 1 catalog, as a function of separation
     # The two catalogs can be any combination of bubbles and YSOs, data or random, depending on the correlation type specified.
     # If one of the catalogs is a bubbles catalog, it must be passed in cat1
@@ -323,7 +321,7 @@ def genNcountsX(cat1, cat2, bins, ctype):
     # Returns:
     # dbnBox: numpy vector of length np.size(bins-1), containing total pair counts in each bin theta, prior to normalisation. this is used for the diagnostic box plots only, not for further calculations
     # dbnTot: numpy vector of length np.size(bins-1), containing normalised pair counts in each bin, for calculation of w(theta)
-    ##############################################################
+    """
     nsrc = np.size(cat1)
     dbn = np.zeros((len(bins)-1,nsrc))
 
@@ -355,7 +353,7 @@ def genNcountsX(cat1, cat2, bins, ctype):
 
 #================================================================
 def genBoxFig(bins, dd, dr, rd, rr, name):
-    ##############################################################
+    """"
     # Generates a box plot showing the total range of pair counts over the bootstrap iterations
     # Inputs:
     # bins: numpy vector of floats with the theta bins
@@ -366,7 +364,7 @@ def genBoxFig(bins, dd, dr, rd, rr, name):
     # name: name of catalog, for additional labelling if desired
     # Returns:
     # The box plot
-    ##############################################################
+    """
     boxFig = plt.figure(figsize=[6,8])
     ddBox = boxFig.add_subplot(211)
     plt.boxplot(dd, notch=0, sym='bx')
@@ -384,7 +382,7 @@ def genBoxFig(bins, dd, dr, rd, rr, name):
     boxFig.show()
 #================================================================
 def genDiagFig(bub, yso, bubR, ysoR):
-    ##############################################################
+    """
     # Generates a composite figure showing the distributions with lon, lat and reff of the data and random catalogues.
     # For diagnostic purposes
     # Inputs:
@@ -394,7 +392,7 @@ def genDiagFig(bub, yso, bubR, ysoR):
     # ysoR: numpy recarray, yso catalog (random); as returned by genRandomYso()
     # Returns:
     # the figure
-    #############################################################
+    """
     diagFig = plt.figure(figsize=(12,8))
     lonData = diagFig.add_axes([0.05, 0.7, 0.4, 0.2])
     latData = diagFig.add_axes([0.5, 0.7, 0.4, 0.2])
@@ -428,7 +426,7 @@ def genDiagFig(bub, yso, bubR, ysoR):
     diagFig.show()
 #================================================================
 def divSample(ysoCat, bubCat):
-    #############################################################
+    """
     # Divide the YSOs up into "associated" and "control" samples according to distance to nearest bubble
     # Input:
     #   ysoCat, bubCat: as defined before
@@ -436,8 +434,7 @@ def divSample(ysoCat, bubCat):
     #   assoc: the YSOs that lie within 2 effective radii from a bubble
     #   assoc2: the YSOs that are specifically within 0.8-1.6 effective radii from a bubble (i.e. associated with the bubble rim)
     #   control: YSOs that lie further than 3 efefctive radii from the nearest bubble.
-    #############################################################
-
+    """
     nyso=np.size(ysoCat)
     assoc = np.zeros(1, dtype=int)
     control = np.zeros(1, dtype=int)
@@ -464,7 +461,7 @@ def divSample(ysoCat, bubCat):
     return assoc, assoc2, control
 #================================================================
 def calcAcorr(dd, dr, rr, bins):
-    ##############################################################
+    """
     # Calculates the auto-correlation function from pair counts returned by genNcountsX(), if corrType='a'
     # Inputs:
     # dd: numpy floats vector of normalised data-data pair counts in each theta bin
@@ -473,14 +470,14 @@ def calcAcorr(dd, dr, rr, bins):
     # bins: numpy floats vector of theta bins (in arcminutes)
     # Returns:
     # w: numpy floats vector with auto-correlation values in each bin theta (see Landy & Szalay, 1993)
-    ###############################################################
+    """
     w = np.zeros(len(bins))
     w = (dd-(2*dr)+rr)/rr
     return w
 
 #================================================================
 def calcXcorr(dd,dr,rd,rr, bins):
-    ##############################################################
+    """"
     # Calculates the cross-correlation function from pair counts returned by genNcountsX(), if corrType='x'
     # Inputs:
     # dd: numpy floats vector of normalised data-data pair counts in each theta bin
@@ -490,7 +487,7 @@ def calcXcorr(dd,dr,rd,rr, bins):
     # bins: numpy floats vector of theta bins (normalised to bubble radii)
     # Returns:
     # w: numpy floats vector with cross-correlation values in each bin theta (see Landy & Szalay, 1993)
-    ###############################################################
+    """
     #calculate the angular correlation vector from the calculated number counts
     w = np.zeros(len(bins))
     w = (dd-dr-rd+rr)/rr

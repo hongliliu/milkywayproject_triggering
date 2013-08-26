@@ -25,9 +25,7 @@ from matplotlib import rc
 import calc_corr
 np.random.seed(42)
 
-<<<<<<< HEAD
-#plt.close('all')   
-=======
+
 plt.close('all')
 >>>>>>> db1145e6915f0c9544e78adcd02cbbb3f8ae79e2
 
@@ -45,7 +43,7 @@ def writeData(t, c, e, outFile='data/new/test.dat', bubCat='cat1', ysoCat='cat2'
 
 #set rc params for plotting
 lines={'linewidth' : 1.5, 'markeredgewidth' : 1.0, 'markersize' : 8.}#, 'markerfacecolor' : None}
-text={'usetex' : 'True'}
+text={'usetex' : 'False'}
 axes={'facecolor' : 'white', 'linewidth' : 1.0, 'titlesize' : 'medium', 'labelsize' : 'medium', 'grid' : True}
 xtick={'labelsize' : 'small'}
 ytick={'labelsize' : 'small'}
@@ -133,12 +131,7 @@ yso = ascii.read(ysofile, delimiter=',', names=ysocols, exclude_names=ysoexc,  d
 neg = yso['lon'] > 180.
 yso['lon'][neg]=yso['lon'][neg]-360.
 #trim the ? out of the types field:
-<<<<<<< HEAD
-#yso[np.char.endswith(yso['type'], '?')]=np.char.rstrip(yso['type'], '?')
-=======
 yso['type'] = np.char.rstrip(yso['type'], '?')
-
->>>>>>> db1145e6915f0c9544e78adcd02cbbb3f8ae79e2
 print '# YSOs before clipping: {0}' .format(np.size(yso))
 # the RMS survey covers more in longitude and latitude than MWP so exclude beyond |l| = 65 and |b| = 1
 coord_lim =  (np.abs(yso['lat']) <= 1.) & (np.abs(yso['lon']) <= 65.)
@@ -146,17 +139,10 @@ yso = yso[coord_lim]
 print '# YSOs after clipping: {0}' .format(np.size(yso))
 # Add any additional clipping criteria here:
 # do counts for the different source types:
-<<<<<<< HEAD
-#types=np.unique(yso['type'])
-#counts=np.zeros((len(types),3))
-#for i in range(0,len(types)):
-#	counts[i,0] = np.size(yso[yso['type'] == types[i]])
-=======
 types=np.unique(yso['type'])
 counts=np.zeros((len(types),3))
 for i in range(0,len(types)):
     counts[i,0] = np.size(yso[yso['type'] == types[i]])
->>>>>>> db1145e6915f0c9544e78adcd02cbbb3f8ae79e2
 
 
 
@@ -181,13 +167,9 @@ mwprms_theta, mwprms_corr, mwprms_err = calc_corr.calc_corr(dr1, yso, corrType='
 # Sample correlation function plot:
 
 mwpFig = plt.figure()
-<<<<<<< HEAD
-plt.errorbar(mwprms_theta, mwprms_corr, yerr=mwprms_err, c='k', marker='o', ls='None', mew=1.5, mec='k', mfc='None', label='MWP all + RMS YSOs')  
-#plt.errorbar(mwpLrms_theta, mwpLrms_corr, yerr=mwpLrms_err, c='r', marker='x', ls='None', mew=1.5, mec='r', mfc='None', label='MWP-L + RMS YSOs')  
-=======
+
 plt.errorbar(mwprms_theta, mwprms_corr, yerr=mwprms_err, c='k', marker='o', ls='None', mew=1.5, mec='k', mfc='None', label='MWP all + RMS YSOs')
 plt.errorbar(mwpLrms_theta, mwpLrms_corr, yerr=mwpLrms_err, c='r', marker='x', ls='None', mew=1.5, mec='r', mfc='None', label='MWP-L + RMS YSOs')
->>>>>>> db1145e6915f0c9544e78adcd02cbbb3f8ae79e2
 plt.xlabel(r'$\theta$ (R$_{\rm eff})$')
 plt.ylabel(r'$w(\theta$)')
 plt.legend(loc='best')
