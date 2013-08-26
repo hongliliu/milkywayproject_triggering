@@ -41,6 +41,7 @@
 #        math
 #        itertools
 #        pdb (optional, for debugging)
+#        sklearn (module neighbors)
 # These packages are all explicitly imported at the start of the code; must be preinstalled by the user.
 #
 # Additional comments:
@@ -207,83 +208,7 @@ def fitReff(inpCat):
 
 #==============================================================
 def genRandomYso(ysoCat, size, params):
-<<<<<<< HEAD
-	###########################################################
-	# Generates a random catalog of YSOs from the input catalog, the user-specified random size and the latitude fit parameters
-	# Inputs:
-	# inpCat: numpy recarray, must contain fields inpCat['lon'] (gal longitude), inpCat['lat'] (gal latitude)
-	# size: int, desired number of sources in random catalog; calculated from the rSize parameter in the top-level function
-	# params: a 2-element tuple of floats with the mu and sigma values of the best-fit gaussian latitude distribution, as returned by fitLat()
-	# Returns:
-	# randCat: numpy recarray with fields randCat['lon'] (float, gal longitudes) and randCat['lat'] (float, gal latitudes)   
-	# NOTE: this version of the code excludes |l| < 10. as this is not covered in the RMS survey. for other surveys, amend lines
-	#           167-168.
-	###########################################################
-	coordLims = [-65., 65., -1., 1.]
-	randSize = size
-	types = [('lon', '<f8'), ('lat', '<f8')]
-	randCatArr = np.ndarray(randSize, dtype=types)
-	lon = np.zeros(randSize)
-	lat = np.zeros(randSize)
-	for elem in range(0,randSize):
-		while True:
-			lon[elem] = np.random.uniform(low=coordLims[0], high=coordLims[1])
-			if np.abs(lon[elem]) > 10.:
-				break
-			#lon[elem] = random.uniform(coordLims[0], coordLims[1])
-		while True:
-			lat[elem] = np.random.normal(loc=params[0], scale=params[1])
-			if np.abs(lat[elem]) <= 1.:
-				break
-			
-			#lat[elem] = random.uniform(coordLims[2], coordLims[3])
-	randCatArr['lon'] = lon
-	randCatArr['lat'] = lat
-	randCat = randCatArr.view(np.recarray)
-	
-	return randCat  
 
-#===============================================================
-def genRandomBubs(bubCat, size, params, rparams):
-	###########################################################
-	# Generates a random catalog of bubbles from the input catalog, the user-specified random size and the latitude and Reff fit parameters
-	# Inputs:
-	# bubCat: numpy recarray, must contain fields bubCat['lon'] (float, gal longitude), bubCat['lat'] (float, gal latitude), bubCat['reff'] (float, effective radius)
-	# size: int, desired number of sources in random catalog; calculated from the rSize parameter in the top-level function
-	# params: a 2-element tuple of floats with the mu and sigma values of the best-fit gaussian latitude distribution, as returned by fitLat()
-	# rparams: as params for the best-fit log-normal distribution for reff, as returned by fitReff()
-	# Returns:
-	# randCat: numpy recarray with fields randCat['lon'] (float, gal longitudes), randCat['lat'] (float, gal latitudes), randCat['reff'] (float, effective radii in arcmin)
-	# all sources in randCat cover the same coordinate range as bubCat and all sizes are within the minimum and maximum sizes in bubCat
-	###########################################################
-	coordLims = [-65., 65., -1., 1.]
-	rLims = [np.min(bubCat['reff']), np.max(bubCat['reff'])]
-	types = [('lon', '<f8'), ('lat', '<f8'), ('reff', '<f8')]
-	randCatArr = np.ndarray(size, dtype=types)
-	lon = np.zeros(size)
-	lat = np.zeros(size)
-	reff_r = np.zeros(size)
-	#generate the randoms here but ensure with while loops that stays within the required coordinate range
-	for elem in range(0, size):
-		while True:
-			lon[elem] = np.random.uniform(low=coordLims[0], high=coordLims[1])
-			if np.abs(lon[elem]) > 10.:
-			   break
-		while True:
-			lat[elem] = np.random.normal(loc=params[0], scale=params[1])
-			if np.abs(lat[elem]) <= 1.:
-				break
-		while True:
-			#reff_r[elem] = random.lognormvariate(rparams[0], rparams[1])
-			reff_r[elem] = np.random.lognormal(mean=rparams[0], sigma=rparams[1])
-			if (reff_r[elem] >= np.min(bubCat['reff'])) & (reff_r[elem] <= np.max(bubCat['reff'])):
-				break
-   	randCatArr['lon'] = lon
-	randCatArr['lat'] = lat
-	randCatArr['reff'] = reff_r
-	randCat = randCatArr.view(np.recarray)
-	return randCat   
-=======
     ###########################################################
     # Generates a random catalog of YSOs from the input catalog, the user-specified random size and the latitude fit parameters
     # Inputs:
@@ -371,7 +296,6 @@ def genRandomBubs(bubCat, size, params, rparams):
     randCatArr['reff'] = reff_r
     randCat = randCatArr.view(np.recarray)
     return randCat
->>>>>>> db1145e6915f0c9544e78adcd02cbbb3f8ae79e2
 
 #=================================================================
 def genBstrap(inpCat):
